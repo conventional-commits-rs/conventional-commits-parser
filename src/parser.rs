@@ -1,4 +1,6 @@
-use conventional_commits_types::{Commit, Footer, FooterSeparator};
+use conventional_commits_types::{
+    Commit, Footer, FooterSeparator, SEPARATOR_COLON, SEPARATOR_HASHTAG,
+};
 use nom::{
     branch::alt,
     bytes::complete::{tag, take, take_while1},
@@ -19,12 +21,6 @@ pub const BREAKING_CHANGE_TOKEN: &str = "BREAKING CHANGE";
 
 /// The `BREAKING-CHANGE` token.
 pub const BREAKING_CHANGE_WITH_HYPHEN_TOKEN: &str = "BREAKING-CHANGE";
-
-/// The `:<space>` separator.
-pub const SEPARATOR_COLON: &str = ": ";
-
-/// The `<space>#` separator for footer notes.
-pub const SEPARATOR_HASHTAG: &str = " #";
 
 /// Parses the commit type.
 ///
