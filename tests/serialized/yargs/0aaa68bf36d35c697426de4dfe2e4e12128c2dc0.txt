@@ -1,0 +1,4 @@
+feat: apply default builder to command() and apply fail() handlers globally (#583)
+
+BREAKING CHANGE: fail is now applied globally.
+BREAKING CHANGE: we now default to an empty builder function when command is executed with no builder.

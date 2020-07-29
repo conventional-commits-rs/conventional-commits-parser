@@ -1,0 +1,8 @@
+This is a commit body message.
+
+It does contain newlines, unicode characters ❤ and double
+
+
+new lines
+
+Fixes #123

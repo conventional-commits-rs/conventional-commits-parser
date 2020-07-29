@@ -1,0 +1,5 @@
+refactor(parser): rename footer-specific
+
+This is a longer commit message
+
+Fixes #123

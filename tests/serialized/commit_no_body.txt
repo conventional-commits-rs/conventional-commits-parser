@@ -1,0 +1,1 @@
+refactor(parser): rename footer-specific

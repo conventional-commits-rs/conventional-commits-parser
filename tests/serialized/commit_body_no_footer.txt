@@ -1,0 +1,3 @@
+fix(scope): short msg
+
+This is a body without a footer following it.

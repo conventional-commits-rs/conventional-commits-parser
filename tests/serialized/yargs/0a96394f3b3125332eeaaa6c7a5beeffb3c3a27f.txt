@@ -1,0 +1,1 @@
+fix: support options/sub-commands in zsh completion
