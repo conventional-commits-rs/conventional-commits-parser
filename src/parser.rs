@@ -12,6 +12,8 @@ use nom::{
 use nom_unicode::complete::alpha1;
 use std::str::FromStr;
 
+pub use conventional_commits_types;
+
 /// The `BREAKING CHANGE` token.
 pub const BREAKING_CHANGE_TOKEN: &str = "BREAKING CHANGE";
 
