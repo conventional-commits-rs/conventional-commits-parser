@@ -90,10 +90,6 @@ fn colon_separator<'a, E: ParseError<&'a str>>(i: &'a str) -> IResult<&'a str, &
 /// e.g., `fix: array parsing issue when multiple spaces were contained in
 /// string`.
 fn description<'a, E: ParseError<&'a str>>(i: &'a str) -> IResult<&'a str, &'a str, E> {
-    // We parse until the newline and remove it before returning the result.
-    // let (rest, desc) = not_line_ending(i)?;
-    // let (rest, _) = opt(line_ending)(rest)?;
-    // Ok((rest, desc))
     not_line_ending(i)
 }
 
@@ -244,17 +240,6 @@ fn footer_identifier<'a, E: ParseError<&'a str>>(
 /// 10. A footer’s value MAY contain spaces and newlines, and parsing MUST
 /// terminate when the next valid footer token/separator pair is observed.
 fn footer_value<'a, E: ParseError<&'a str>>(i: &'a str) -> IResult<&'a str, &'a str, E> {
-    // let mut char_offset = 0usize;
-    // for line in i.lines() {
-    //     if peek::<_, _, E, _>(footer_identifier)(line).is_ok() {
-    //         char_offset += 1;
-    //         break;
-    //     }
-    //
-    //     char_offset += line.chars().count() + 1;
-    // }
-    //
-    // map(take(char_offset - 1), str::trim_end)(i)
     println!("footer: {:?}", i);
 
     let mut offset_to_split_off = 0usize;
@@ -367,63 +352,8 @@ pub fn commit_complete<'a, E: ParseError<&'a str>>(i: &'a str) -> IResult<&'a st
                         }
                     }
                 }
-
-                // return match res {
-                //     (rest, Some(v)) if v.is_empty() => Ok((i, None)),
-                //     (rest, None) => Ok((rest, None)),
-                //     (rest, o) => Ok((rest, o)),
-                // };
-
-                // TODO: cleanup using conditional match. This didn't work
-                // though the first time I tried...
-                // return match o {
-                //     Some(v) => {
-                //         if v.is_none() {
-                //             Ok((i, None))
-                //         } else {
-                //             Ok((rest, v))
-                //         }
-                //     },
-                //     None => {
-                //         Ok((i, None))
-                //     }
-                // };
-
-                // Check if two new lines are occurring before the body part.
-                // let res = count::<_, _, E, _>(line_ending, 2)(i);
-                // if let Ok((rest, _)) = res {
-                //     // If that is the case, run the body parser.
-                //     let res: IResult<&str, &str, E> = body(rest);
-                //     // Empty bodies are treated as non-existing
-                //     // TODO: is this really a good idea? -> investigate!
-                //
-                //     // XXX: if not explicitly checked, body will always
-                // match, even if only a footer     // is present.
-                // This is due to the fact that the body is terminated by a
-                // footer     // and starts with a double
-                // newline. This does even apply to an empty body.
-                //     if let Ok((rest, b)) = res {
-                //         if b.is_empty() {
-                //             println!("body is empty");
-                //             return Ok((i, None));
-                //         }
-                //         return Ok((rest, Some(b)));
-                //     }
-                // }
-                //
-                // Ok((i, None))
             }),
             context("Optional footer", |i| {
-                // println!("{:?}", i);
-                // let res = count::<_, _, E, _>(line_ending, 2)(i);
-                // if let Ok((rest, _)) = res {
-                //     println!("matching on {:?}", rest);
-                //     return many0(footer)(rest);
-                // } else {
-                //     println!("fucky fucky no matchi matchi");
-                // }
-                //
-                // Ok((i, Vec::new()))
                 println!("opt footer: {:?}", i);
 
                 let (rest, line_end) = opt(line_ending::<_, E>)(i)?;
