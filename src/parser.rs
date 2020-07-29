@@ -110,7 +110,8 @@ fn description<'a, E: ParseError<&'a str>>(i: &'a str) -> IResult<&'a str, &'a s
 ///
 /// 7) A commit body is free-form and MAY consist of any number of newline
 /// separated paragraphs.
-// TODO: make function return Option<&str> and do not rely on empty strings being empty bodies.
+// TODO: make function return Option<&str> and do not rely on empty strings
+// being empty bodies.
 fn body<'a, E: ParseError<&'a str>>(i: &'a str) -> IResult<&'a str, Option<&str>, E> {
     println!("body for: {:?}", i);
 
@@ -124,8 +125,8 @@ fn body<'a, E: ParseError<&'a str>>(i: &'a str) -> IResult<&'a str, Option<&str>
 
     for (idx, line) in i.lines().enumerate() {
         println!("  idx body@{} -> {:?}", idx, line);
-        // Check if the line is just a newline. Since we iterate over each line, the content of the
-        // line will be empty in those cases.
+        // Check if the line is just a newline. Since we iterate over each line, the
+        // content of the line will be empty in those cases.
         if line.is_empty() {
             println!("  found newline body");
             found_newline = true;
@@ -157,12 +158,9 @@ fn body<'a, E: ParseError<&'a str>>(i: &'a str) -> IResult<&'a str, Option<&str>
     // println!()
     println!("  idx body@done -> before mapping: {}", offset_to_split_off);
 
-    // Depending on whether a new line has been found and therefore a following footer, the offset has to be shortened by either 1 or 2 chars.
-    let to_subtract = if found_newline {
-        2
-    } else {
-        1
-    };
+    // Depending on whether a new line has been found and therefore a following
+    // footer, the offset has to be shortened by either 1 or 2 chars.
+    let to_subtract = if found_newline { 2 } else { 1 };
 
     let (rest, b) = map(take(offset_to_split_off - to_subtract), str::trim)(i)?;
     Ok((rest, Some(b)))
@@ -324,7 +322,9 @@ fn commit<'a, E: ParseError<&'a str>>(i: &'a str) -> IResult<&'a str, CommitFirs
     )(i)
 }
 
-fn footers<'a, E: ParseError<&'a str>>(i: &'a str) -> IResult<&'a str, Vec<(&'a str, FooterSeparator, &'a str)>, E> {
+fn footers<'a, E: ParseError<&'a str>>(
+    i: &'a str,
+) -> IResult<&'a str, Vec<(&'a str, FooterSeparator, &'a str)>, E> {
     //many0(preceded(opt(line_ending), footer))(i)
     many0(footer)(i)
 }
@@ -336,11 +336,13 @@ pub fn commit_complete<'a, E: ParseError<&'a str>>(i: &'a str) -> IResult<&'a st
             context("First line", commit),
             context("Optional body", |i| {
                 println!("opt body: {:?}", i);
-                // The body is separated by one empty line. However, the first line parser does not consume the newline after the description. This has to be done now.
+                // The body is separated by one empty line. However, the first line parser does
+                // not consume the newline after the description. This has to be done now.
                 let (rest, line_end) = opt(line_ending::<_, E>)(i)?;
-                if  line_end.is_none() {
+                if line_end.is_none() {
                     println!("context:::: body -> no line feed found, assuming no body content. continue with: {:?}", i);
-                    // No new line has been found, so the commit message only contains a description.
+                    // No new line has been found, so the commit message only contains a
+                    // description.
                     return Ok((i, None));
                 } else {
                     println!("{:?}", rest);
@@ -350,15 +352,18 @@ pub fn commit_complete<'a, E: ParseError<&'a str>>(i: &'a str) -> IResult<&'a st
                 println!("not error :) -> {:?}", res);
                 let (rest, optional_body) = res;
 
-                // XXX: maybe this can be done better. Not sure how exactly though. The double option feels hacky and as far as I can tell, None doesn't happen anyway as we check it already early on.
+                // XXX: maybe this can be done better. Not sure how exactly though. The double
+                // option feels hacky and as far as I can tell, None doesn't happen anyway as we
+                // check it already early on.
                 match optional_body {
-                    // If None than no body has been found, i.e. only a description. In this case return the original input as the rest.
+                    // If None than no body has been found, i.e. only a description. In this case
+                    // return the original input as the rest.
                     None => Ok((i, None)),
                     Some(inner_optional) => {
                         // If the inner value is None than no body has been found.
                         match inner_optional {
                             None => Ok((i, None)),
-                            Some(b) => Ok((rest, Some(b)))
+                            Some(b) => Ok((rest, Some(b))),
                         }
                     }
                 }
@@ -369,8 +374,8 @@ pub fn commit_complete<'a, E: ParseError<&'a str>>(i: &'a str) -> IResult<&'a st
                 //     (rest, o) => Ok((rest, o)),
                 // };
 
-                // TODO: cleanup using conditional match. This didn't work though the first time I
-                // tried...
+                // TODO: cleanup using conditional match. This didn't work
+                // though the first time I tried...
                 // return match o {
                 //     Some(v) => {
                 //         if v.is_none() {
@@ -392,9 +397,11 @@ pub fn commit_complete<'a, E: ParseError<&'a str>>(i: &'a str) -> IResult<&'a st
                 //     // Empty bodies are treated as non-existing
                 //     // TODO: is this really a good idea? -> investigate!
                 //
-                //     // XXX: if not explicitly checked, body will always match, even if only a footer
-                //     // is present. This is due to the fact that the body is terminated by a footer
-                //     // and starts with a double newline. This does even apply to an empty body.
+                //     // XXX: if not explicitly checked, body will always
+                // match, even if only a footer     // is present.
+                // This is due to the fact that the body is terminated by a
+                // footer     // and starts with a double
+                // newline. This does even apply to an empty body.
                 //     if let Ok((rest, b)) = res {
                 //         if b.is_empty() {
                 //             println!("body is empty");
@@ -420,9 +427,10 @@ pub fn commit_complete<'a, E: ParseError<&'a str>>(i: &'a str) -> IResult<&'a st
                 println!("opt footer: {:?}", i);
 
                 let (rest, line_end) = opt(line_ending::<_, E>)(i)?;
-                if  line_end.is_none() {
+                if line_end.is_none() {
                     println!("context:::: footer -> no line feed found, assuming no body content. continue with: {:?}", i);
-                    // No new line has been found, so the commit message only contains a description.
+                    // No new line has been found, so the commit message only contains a
+                    // description.
                     return Ok((i, None));
                 } else {
                     println!("rest -> {:?}", rest);
@@ -437,10 +445,8 @@ pub fn commit_complete<'a, E: ParseError<&'a str>>(i: &'a str) -> IResult<&'a st
                 .iter()
                 .map(|f| Footer::from(f.0, f.1, f.2))
                 .collect::<Vec<_>>();
-            let is_breaking_change = first_line.2.is_some()
-                || footers
-                    .iter()
-                    .any(|f| is_breaking_change_token(f.token));
+            let is_breaking_change =
+                first_line.2.is_some() || footers.iter().any(|f| is_breaking_change_token(f.token));
 
             Commit::from(
                 first_line.0,
@@ -470,7 +476,7 @@ pub fn parse_commit_msg(i: &str) -> Result<Commit, VerboseError<&str>> {
 #[cfg(test)]
 mod tests {
     use super::r#type;
-    use crate::parser::{body, description, footer, footer_token, scope, footers};
+    use crate::parser::{body, description, footer, footer_token, footers, scope};
     use conventional_commits_types::FooterSeparator;
     use nom::{
         error::{ErrorKind, VerboseError},
@@ -608,10 +614,13 @@ mod tests {
     #[test]
     fn test_footers() {
         let i = "Fixes #123\nPR-Close #432";
-        let expected = Ok(("", vec![
-            ("Fixes", FooterSeparator::SpaceHashTag, "123"),
-            ("PR-Close", FooterSeparator::SpaceHashTag, "432"),
-        ]));
+        let expected = Ok((
+            "",
+            vec![
+                ("Fixes", FooterSeparator::SpaceHashTag, "123"),
+                ("PR-Close", FooterSeparator::SpaceHashTag, "432"),
+            ],
+        ));
         assert_eq!(expected, footers::<VerboseError<&str>>(i));
     }
 
@@ -646,8 +655,8 @@ mod tests {
                 folder_commit_msg_is_in.join(&format!("{}.ron", stem.unwrap().to_str().unwrap()));
 
             // Parse the commit and compare it to the saved ron commit.
-            // We trim the end of the commits as the command I (SirWindfield) used for exporting does
-            // append some newlines.
+            // We trim the end of the commits as the command I (SirWindfield) used for
+            // exporting does append some newlines.
             let commit_content = std::fs::read_to_string(entry.path())?;
             let commit_content_trimmed = commit_content.trim_end();
             let ser_commit_content = std::fs::read_to_string(result_ron_file)?;
