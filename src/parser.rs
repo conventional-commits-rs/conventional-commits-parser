@@ -109,8 +109,6 @@ fn description<'a, E: ParseError<&'a str>>(i: &'a str) -> IResult<&'a str, &'a s
 // TODO: make function return Option<&str> and do not rely on empty strings
 // being empty bodies.
 fn body<'a, E: ParseError<&'a str>>(i: &'a str) -> IResult<&'a str, Option<&str>, E> {
-    println!("body for: {:?}", i);
-
     // If the next token is actually a footer, the body is empty.
     if peek::<_, _, E, _>(footer_identifier)(i).is_ok() {
         return Ok((i, None));
@@ -120,39 +118,23 @@ fn body<'a, E: ParseError<&'a str>>(i: &'a str) -> IResult<&'a str, Option<&str>
     let mut offset_to_split_off = 0usize;
 
     for (idx, line) in i.lines().enumerate() {
-        println!("  idx body@{} -> {:?}", idx, line);
         // Check if the line is just a newline. Since we iterate over each line, the
         // content of the line will be empty in those cases.
         if line.is_empty() {
-            println!("  found newline body");
             found_newline = true;
         } else if peek::<_, _, E, _>(footer_identifier)(line).is_ok() && found_newline {
-            println!("  peeked at body: {:?}", line);
-            // If the current line is a footer identifier, from the beginning until two
-            // lines above. This removes the empty line before the footer
-            // identifier and leaves the identifier still intact.
-            //offset_to_split_off += 1;
+            // We break if we find a valid footer identifier proceeded by a newline.
             break;
         } else {
             // Reset trigger condition to make sure that we skip paragraphs that are not
             // followed by a footer identifier.
-            println!("  newline @body");
             found_newline = false;
         }
 
         // +1 needed to accommodate for the missing newline that sits between each of
         // the enumerated lines.
-        println!("  res: idx body@{} -> {}", idx, line.chars().count());
         offset_to_split_off += line.chars().count() + 1;
-        println!("  res: idx body@{} -> offset: {}", idx, offset_to_split_off);
     }
-
-    // let (rest, taken) = take(offset_to_split_off - 1)(i)?;
-    // println!("taken: {:?}", taken);
-    // println!("rest: {:?}", rest);
-    // Ok((rest, taken))
-    // println!()
-    println!("  idx body@done -> before mapping: {}", offset_to_split_off);
 
     // Depending on whether a new line has been found and therefore a following
     // footer, the offset has to be shortened by either 1 or 2 chars.
@@ -240,14 +222,10 @@ fn footer_identifier<'a, E: ParseError<&'a str>>(
 /// 10. A footer’s value MAY contain spaces and newlines, and parsing MUST
 /// terminate when the next valid footer token/separator pair is observed.
 fn footer_value<'a, E: ParseError<&'a str>>(i: &'a str) -> IResult<&'a str, &'a str, E> {
-    println!("footer: {:?}", i);
-
     let mut offset_to_split_off = 0usize;
-    for (idx, line) in i.lines().enumerate() {
-        println!("  idx footer@{} -> {:?}", idx, line);
+    for line in i.lines() {
         // Check if the next line starts a new footer
         if peek::<_, _, E, _>(footer_identifier)(line).is_ok() {
-            println!("  peeked at footer: {:?}", line);
             offset_to_split_off += 1;
             break;
         }
@@ -266,7 +244,6 @@ type FooterType<'a> = (&'a str, FooterSeparator, &'a str);
 ///
 /// 8. One or more footers MAY be provided one blank line after the body. Each footer MUST consist of a word token, followed by either a :<space> or <space># separator, followed by a string value (this is inspired by the [git trailer convention](https://git-scm.com/docs/git-interpret-trailers)).
 fn footer<'a, E: ParseError<&'a str>>(i: &'a str) -> IResult<&'a str, FooterType<'a>, E> {
-    println!("input@footer: {:?}", i);
     tuple((footer_token, footer_separator, footer_value))(i)
 }
 
@@ -320,22 +297,16 @@ pub fn commit_complete<'a, E: ParseError<&'a str>>(i: &'a str) -> IResult<&'a st
         tuple((
             context("First line", commit),
             context("Optional body", |i| {
-                println!("opt body: {:?}", i);
                 // The body is separated by one empty line. However, the first line parser does
                 // not consume the newline after the description. This has to be done now.
                 let (rest, line_end) = opt(line_ending::<_, E>)(i)?;
                 if line_end.is_none() {
-                    println!("context:::: body -> no line feed found, assuming no body content. continue with: {:?}", i);
                     // No new line has been found, so the commit message only contains a
                     // description.
                     return Ok((i, None));
-                } else {
-                    println!("{:?}", rest);
                 }
 
-                let res = opt::<_, _, E, _>(preceded(line_ending, body))(rest)?;
-                println!("not error :) -> {:?}", res);
-                let (rest, optional_body) = res;
+                let (rest, optional_body) = opt::<_, _, E, _>(preceded(line_ending, body))(rest)?;
 
                 // XXX: maybe this can be done better. Not sure how exactly though. The double
                 // option feels hacky and as far as I can tell, None doesn't happen anyway as we
@@ -354,16 +325,11 @@ pub fn commit_complete<'a, E: ParseError<&'a str>>(i: &'a str) -> IResult<&'a st
                 }
             }),
             context("Optional footer", |i| {
-                println!("opt footer: {:?}", i);
-
                 let (rest, line_end) = opt(line_ending::<_, E>)(i)?;
                 if line_end.is_none() {
-                    println!("context:::: footer -> no line feed found, assuming no body content. continue with: {:?}", i);
                     // No new line has been found, so the commit message only contains a
                     // description.
                     return Ok((i, None));
-                } else {
-                    println!("rest -> {:?}", rest);
                 }
 
                 opt(preceded(line_ending, footers))(rest)
