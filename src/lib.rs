@@ -11,6 +11,6 @@ mod parser;
 
 pub use conventional_commits_types::{Commit, Footer};
 pub use parser::{
-    commit_complete, parse_commit_msg, BREAKING_CHANGE_TOKEN, BREAKING_CHANGE_WITH_HYPHEN_TOKEN,
+    parse_commit_msg, BREAKING_CHANGE_TOKEN, BREAKING_CHANGE_WITH_HYPHEN_TOKEN,
     SEPARATOR_COLON, SEPARATOR_HASHTAG,
 };

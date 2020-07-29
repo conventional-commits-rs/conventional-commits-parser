@@ -117,7 +117,7 @@ fn body<'a, E: ParseError<&'a str>>(i: &'a str) -> IResult<&'a str, Option<&str>
     let mut found_newline = false;
     let mut offset_to_split_off = 0usize;
 
-    for (idx, line) in i.lines().enumerate() {
+    for line in i.lines() {
         // Check if the line is just a newline. Since we iterate over each line, the
         // content of the line will be empty in those cases.
         if line.is_empty() {
@@ -292,7 +292,7 @@ fn footers<'a, E: ParseError<&'a str>>(
 }
 
 /// Parses a complete commit with all optional parts.
-pub fn commit_complete<'a, E: ParseError<&'a str>>(i: &'a str) -> IResult<&'a str, Commit<'a>, E> {
+fn commit_complete<'a, E: ParseError<&'a str>>(i: &'a str) -> IResult<&'a str, Commit<'a>, E> {
     map(
         tuple((
             context("First line", commit),
