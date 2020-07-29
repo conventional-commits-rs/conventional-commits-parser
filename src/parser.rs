@@ -238,7 +238,7 @@ fn footer_value<'a, E: ParseError<&'a str>>(i: &'a str) -> IResult<&'a str, &'a 
 
 type FooterType<'a> = (&'a str, FooterSeparator, &'a str);
 
-///
+/// Parses a single footer entry.
 ///
 /// # Specification
 ///
@@ -284,6 +284,7 @@ fn commit<'a, E: ParseError<&'a str>>(i: &'a str) -> IResult<&'a str, CommitFirs
     )(i)
 }
 
+/// Parses the footer section.
 fn footers<'a, E: ParseError<&'a str>>(
     i: &'a str,
 ) -> IResult<&'a str, Vec<(&'a str, FooterSeparator, &'a str)>, E> {
@@ -356,6 +357,12 @@ fn commit_complete<'a, E: ParseError<&'a str>>(i: &'a str) -> IResult<&'a str, C
     )(i)
 }
 
+/// Parses a conventional commit message.
+///
+/// # Returns
+///
+/// `Ok(Commit)` if the parsing was successful, `Err(VerboseError)` if something
+/// went wrong during parsing.
 pub fn parse_commit_msg(i: &str) -> Result<Commit, VerboseError<&str>> {
     let result = commit_complete::<VerboseError<_>>(i);
     result
