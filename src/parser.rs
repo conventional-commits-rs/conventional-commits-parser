@@ -3,16 +3,14 @@ use nom::{
     branch::alt,
     bytes::complete::{tag, take, take_while1},
     character::complete::{line_ending, not_line_ending},
-    combinator::{map, map_parser, map_res, not, opt, peek},
+    combinator::{map, map_res, opt, peek},
     error::{context, ParseError, VerboseError},
-    multi::{count, many0},
-    sequence::{delimited, preceded, terminated, tuple},
+    multi::many0,
+    sequence::{preceded, terminated, tuple},
     IResult,
 };
 use nom_unicode::{complete::alpha1, is_alphabetic};
 use std::str::FromStr;
-use nom::combinator::{all_consuming, recognize};
-use std::hint::unreachable_unchecked;
 
 /// The `BREAKING CHANGE` token.
 pub const BREAKING_CHANGE_TOKEN: &str = "BREAKING CHANGE";
@@ -442,8 +440,7 @@ pub fn commit_complete<'a, E: ParseError<&'a str>>(i: &'a str) -> IResult<&'a st
             let is_breaking_change = first_line.2.is_some()
                 || footers
                     .iter()
-                    .find(|&f| is_breaking_change_token(f.token))
-                    .is_some();
+                    .any(|f| is_breaking_change_token(f.token));
 
             Commit::from(
                 first_line.0,
