@@ -1,0 +1,4 @@
+chore(deps): update dependency rimraf to v3 (#1548)
+
+Co-authored-by: WhiteSource Renovate <renovatebot@gmail.com>
+
