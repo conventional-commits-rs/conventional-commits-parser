@@ -9,7 +9,7 @@ use nom::{
     sequence::{preceded, terminated, tuple},
     IResult,
 };
-use nom_unicode::{complete::alpha1, is_alphabetic};
+use nom_unicode::complete::alpha1;
 use std::str::FromStr;
 
 /// The `BREAKING CHANGE` token.
@@ -191,7 +191,7 @@ fn breaking_change_footer_token<'a, E: ParseError<&'a str>>(
 ///
 /// Valid chars are all alphabetic unicode chars and the hyphen.
 fn is_footer_token_char(c: char) -> bool {
-    is_alphabetic(c) || c == '-'
+    c.is_alphabetic() || c == '-'
 }
 
 /// Parses all footer tokens except the breaking changes one.
