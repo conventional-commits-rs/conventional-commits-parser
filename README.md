@@ -1,29 +1,27 @@
-# zerotask-rust-lib-template
+# conventional-commits-parser
 
+[![Maintenance](https://img.shields.io/badge/maintenance-actively%20maintained-brightgreen.svg)](https://github.com/conventional-commits-rs/conventional-commits-parser)
+[![crates.io](https://img.shields.io/crates/v/conventional-commits-parser.svg)](https://crates.io/crates/conventional-commits-parser)
+[![Documentation](https://docs.rs/conventional-commits-parser/badge.svg)](https://docs.rs/conventional-commits-parser)
 [![docs_master_badge]][docs_master_url]
 
-> A GitHub template for Rust libraries.
+> A library for parsing conventional commits.
 
-## Features
+## Example
 
-- Continuous Integration through GitHub Actions
-  - Each PR is tested by running the following commands to ensure that only working code is added to the repository:
-    - `cargo fmt` to ensure uniform source code formatting.
-    - `cargo clippy` to use more idiomic Rust code, optimize code as well as prevent hard to spot bugs.
-    - `cargo check` to ensure that the library compiles properly.
-    - `cargo test` to ensure that the library works as expected.
-  - Each push to master triggers the following:
-    - Generation of the newest documentation that gets pushed to the `gh-pages` branch.
-- MSRV (**M**inimal **s**upported **R**ust **v**ersion)
-  - Kept in sync with the latest available Rust version on Ubuntu.
-- Opinioded `rustfmt` configuration file.
-- Misc
-  - `.editorconfig` file for code-unrelated files.
-    - Ensures proper formatting for workflow files and other configuration files.
+```rust
+use conventional_commits_parser::parse_commit_msg;
+
+fn main() {
+    let msg = "feat(parser)!: remove parsing capabilities";
+    let commit = parse_commit_msg(msg).expect("failed to parse commit message");
+    println!("{:#?}", commit);
+}
+```
 
 ## Current Properties
 
-- MSRV: 1.41.0
+- MSRV: 1.41.0 (tested)
 
 ## License
 
