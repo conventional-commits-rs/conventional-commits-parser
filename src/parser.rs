@@ -361,7 +361,7 @@ fn commit_complete<'a, E: ParseError<&'a str>>(i: &'a str) -> IResult<&'a str, C
 ///
 /// `Ok(Commit)` if the parsing was successful, `Err(VerboseError)` if something
 /// went wrong during parsing.
-pub fn parse_commit_msg(i: &str) -> Result<Commit, VerboseError<&str>> {
+pub fn parse_commit_msg<'a>(i: &'a str) -> Result<Commit<'a>, VerboseError<&'a str>> {
     let result = commit_complete::<VerboseError<_>>(i);
     result
         .map_err(|err| match err {
