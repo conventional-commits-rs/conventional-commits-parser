@@ -2,6 +2,7 @@
 
 [![Maintenance](https://img.shields.io/badge/maintenance-actively%20maintained-brightgreen.svg)](https://github.com/conventional-commits-rs/conventional-commits-parser)
 [![crates.io](https://img.shields.io/crates/v/conventional-commits-parser.svg)](https://crates.io/crates/conventional-commits-parser)
+[![crates.io](https://img.shields.io/crates/d/conventional-commits-parser)](https://crates.io/crates/conventional-commits-parser)
 [![Documentation](https://docs.rs/conventional-commits-parser/badge.svg)](https://docs.rs/conventional-commits-parser)
 [![docs_master_badge]][docs_master_url]
 
