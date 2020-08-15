@@ -366,7 +366,7 @@ pub fn parse_commit_msg<'a>(i: &'a str) -> Result<Commit<'a>, VerboseError<&'a s
     result
         .map_err(|err| match err {
             nom::Err::Error(err) | nom::Err::Failure(err) => {
-                println!("{}", nom::error::convert_error(i, err.clone()));
+                //println!("{}", nom::error::convert_error(i, err.clone()));
                 err
             }
             _ => unreachable!(),
