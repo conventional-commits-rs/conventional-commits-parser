@@ -18,7 +18,7 @@ nom-unicode = "0.1.0"
 [dev-dependencies]
 anyhow = "1.0.32"
 pretty_assertions = "0.6.1"
-quickcheck = "0.9.2"
+quickcheck = "1.0.1"
 quickcheck_macros = "0.9.1"
 ron = "0.6.0"
 walkdir = "2.3.1"
