@@ -12,7 +12,7 @@ exclude = ["tests/x"]
 
 [dependencies]
 conventional-commits-types = "0.2.1"
-nom = "5.1.2"
+nom = "6.1.0"
 nom-unicode = "0.1.0"
 
 [dev-dependencies]
