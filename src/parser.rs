@@ -6,10 +6,10 @@ use nom::{
     bytes::complete::{tag, take, take_while1},
     character::complete::{line_ending, not_line_ending},
     combinator::{map, map_res, opt, peek},
-    error::{context, ParseError, VerboseError},
+    error::{context, ContextError, FromExternalError, ParseError, VerboseError},
     multi::many0,
     sequence::{preceded, terminated, tuple},
-    IResult,
+    Err, IResult,
 };
 use nom_unicode::complete::alpha1;
 use std::str::FromStr;
@@ -106,7 +106,9 @@ fn description<'a, E: ParseError<&'a str>>(i: &'a str) -> IResult<&'a str, &'a s
 /// separated paragraphs.
 // TODO: make function return Option<&str> and do not rely on empty strings
 // being empty bodies.
-fn body<'a, E: ParseError<&'a str>>(i: &'a str) -> IResult<&'a str, Option<&str>, E> {
+fn body<'a, E: FromExternalError<&'a str, String> + ParseError<&'a str>>(
+    i: &'a str,
+) -> IResult<&'a str, Option<&str>, E> {
     // If the next token is actually a footer, the body is empty.
     if peek::<_, _, E, _>(footer_identifier)(i).is_ok() {
         return Ok((i, None));
@@ -191,7 +193,7 @@ fn footer_token<'a, E: ParseError<&'a str>>(i: &'a str) -> IResult<&'a str, &'a 
 /// Parses the footer separator.
 ///
 /// The footer separator separates the footer's token from its value.
-fn footer_separator<'a, E: ParseError<&'a str>>(
+fn footer_separator<'a, E: FromExternalError<&'a str, String> + ParseError<&'a str>>(
     i: &'a str,
 ) -> IResult<&'a str, FooterSeparator, E> {
     map_res(alt((tag(SEPARATOR_COLON), tag(SEPARATOR_HASHTAG))), |v| {
@@ -205,7 +207,7 @@ fn footer_separator<'a, E: ParseError<&'a str>>(
 type FooterIdentifier<'a> = (&'a str, FooterSeparator);
 
 /// Parses a footer identifier.
-fn footer_identifier<'a, E: ParseError<&'a str>>(
+fn footer_identifier<'a, E: FromExternalError<&'a str, String> + ParseError<&'a str>>(
     i: &'a str,
 ) -> IResult<&'a str, FooterIdentifier<'a>, E> {
     tuple((footer_token, footer_separator))(i)
@@ -219,7 +221,9 @@ fn footer_identifier<'a, E: ParseError<&'a str>>(
 ///
 /// 10. A footer’s value MAY contain spaces and newlines, and parsing MUST
 /// terminate when the next valid footer token/separator pair is observed.
-fn footer_value<'a, E: ParseError<&'a str>>(i: &'a str) -> IResult<&'a str, &'a str, E> {
+fn footer_value<'a, E: FromExternalError<&'a str, String> + ParseError<&'a str>>(
+    i: &'a str,
+) -> IResult<&'a str, &'a str, E> {
     let mut offset_to_split_off = 0usize;
     for line in i.lines() {
         // Check if the next line starts a new footer
@@ -241,7 +245,9 @@ type FooterType<'a> = (&'a str, FooterSeparator, &'a str);
 /// # Specification
 ///
 /// 8. One or more footers MAY be provided one blank line after the body. Each footer MUST consist of a word token, followed by either a :<space> or <space># separator, followed by a string value (this is inspired by the [git trailer convention](https://git-scm.com/docs/git-interpret-trailers)).
-fn footer<'a, E: ParseError<&'a str>>(i: &'a str) -> IResult<&'a str, FooterType<'a>, E> {
+fn footer<'a, E: FromExternalError<&'a str, String> + ParseError<&'a str>>(
+    i: &'a str,
+) -> IResult<&'a str, FooterType<'a>, E> {
     tuple((footer_token, footer_separator, footer_value))(i)
 }
 
@@ -283,7 +289,7 @@ fn commit<'a, E: ParseError<&'a str>>(i: &'a str) -> IResult<&'a str, CommitFirs
 }
 
 /// Parses the footer section.
-fn footers<'a, E: ParseError<&'a str>>(
+fn footers<'a, E: FromExternalError<&'a str, String> + ParseError<&'a str>>(
     i: &'a str,
 ) -> IResult<&'a str, Vec<(&'a str, FooterSeparator, &'a str)>, E> {
     //many0(preceded(opt(line_ending), footer))(i)
@@ -291,7 +297,12 @@ fn footers<'a, E: ParseError<&'a str>>(
 }
 
 /// Parses a complete commit with all optional parts.
-fn commit_complete<'a, E: ParseError<&'a str>>(i: &'a str) -> IResult<&'a str, Commit<'a>, E> {
+fn commit_complete<
+    'a,
+    E: ContextError<&'a str> + FromExternalError<&'a str, String> + ParseError<&'a str>,
+>(
+    i: &'a str,
+) -> IResult<&'a str, Commit<'a>, E> {
     map(
         tuple((
             context("First line", commit),
