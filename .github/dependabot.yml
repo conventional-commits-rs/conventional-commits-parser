@@ -1,0 +1,20 @@
+version: 2
+updates:
+- package-ecosystem: cargo
+  directory: "/"
+  schedule:
+    interval: daily
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: pretty_assertions
+    versions:
+    - 0.7.1
+  - dependency-name: nom
+    versions:
+    - 6.1.0
+  - dependency-name: quickcheck
+    versions:
+    - 1.0.3
+  - dependency-name: quickcheck_macros
+    versions:
+    - 1.0.0
